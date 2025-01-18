@@ -69,7 +69,7 @@ def create_server():
             if not query:
                 raise ValueError("No query provided.")
 
-            result_text: str = search_web(query, lang)
+            result_text: str = await search_web(query, lang)
 
             return [
                 types.TextContent(

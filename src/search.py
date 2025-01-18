@@ -1,6 +1,5 @@
 import httpx
 import os
-import asyncio
 
 async def request(url, params):
     async with httpx.AsyncClient() as client:
@@ -8,7 +7,7 @@ async def request(url, params):
         response.raise_for_status()
         return response.json()
 
-def search_web(query, lang):
+async def search_web(query, lang):
 
     searxng_instance = os.environ["SEARXNG_URL"]
 
@@ -20,7 +19,7 @@ def search_web(query, lang):
     if lang:
         params["language"] = lang
 
-    search_results = asyncio.run(request(searxng_instance, params))
+    search_results = await request(searxng_instance, params)
 
     # Keep only result with relevance over 2
     relevant_results: list = []
