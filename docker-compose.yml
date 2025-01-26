@@ -6,4 +6,6 @@ services:
     ports:
       - "8960:8960"
     environment:
-      SEARXNG_URL: URL of your SearxNG instance
+      SEARXNG_URL: URL of your SearxNG instance (e.g. http://localhost:8083/search)
+      RELEVANCE_LIMIT: Minimum limit for search result relevance score (float)
+      RESULT_NUMBER: Maximum number of results returned (int)
