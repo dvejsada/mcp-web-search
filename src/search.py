@@ -1,6 +1,13 @@
 import httpx
 import os
 
+SEARXNG_INSTANCE = os.environ.get("SEARXNG_URL")
+if not SEARXNG_INSTANCE:
+    raise ValueError("Missing SearxNG URL in environment variables.")
+RELEVANCE_LIMIT = int(os.environ.get("RELEVANCE_LIMIT",0))
+RESULT_NUMBER = int(os.environ.get("RELEVANCE_LIMIT",10))
+
+
 async def request(url, params):
     async with httpx.AsyncClient() as client:
         response = await client.request(url=url, method="GET", params=params, timeout=30.0)
@@ -9,27 +16,22 @@ async def request(url, params):
 
 async def search_web(query, lang):
 
-    searxng_instance = os.environ["SEARXNG_URL"]
-
-    if not searxng_instance:
-        ValueError("Missing SearxNG URL in environment variables.")
-
     params: dict = {"q": query, "format":"json"}
 
     if lang:
         params["language"] = lang
 
-    search_results = await request(searxng_instance, params)
+    search_results = await request(SEARXNG_INSTANCE, params)
 
     # Keep only result with relevance over 2
     relevant_results: list = []
     for result in search_results["results"]:
-        if result["score"] > 2:
+        if result["score"] > RELEVANCE_LIMIT:
             relevant_results.append(result)
 
     # If there are more than 10 relevant results, pass only ten most relevant
-    if len(relevant_results) > 10:
-        relevant_results = relevant_results[10:]
+    if len(relevant_results) > RESULT_NUMBER:
+        relevant_results = relevant_results[RESULT_NUMBER:]
 
     # If there is no relevant result, return this information
     if len(relevant_results) == 0:
