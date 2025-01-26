@@ -1,0 +1,9 @@
+services:
+  Media_creator:
+    image: georgx22/mcp-search:latest
+    container_name: MCP Web Search
+    restart: always
+    ports:
+      - "8960:8960"
+    environment:
+      SEARXNG_URL: URL of your SearxNG instance
