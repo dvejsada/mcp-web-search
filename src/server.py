@@ -16,7 +16,7 @@ def create_server():
 
     init_options = InitializationOptions(
         server_name="mcp-search",
-        server_version="0.1",
+        server_version="0.2",
         capabilities=server.get_capabilities(
             notification_options=NotificationOptions(),
             experimental_capabilities={},
