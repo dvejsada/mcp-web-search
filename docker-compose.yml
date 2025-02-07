@@ -1,7 +1,7 @@
 services:
-  Media_creator:
+  mcp-search:
     image: georgx22/mcp-search:latest
-    container_name: MCP Web Search
+    container_name: mcp-web-search
     restart: always
     ports:
       - "8960:8960"
