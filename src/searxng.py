@@ -1,29 +1,17 @@
-import httpx
-import os
-
-SEARXNG_INSTANCE = os.environ.get("SEARXNG_URL")
-if not SEARXNG_INSTANCE:
-    raise ValueError("Missing SearxNG URL in environment variables.")
-RELEVANCE_LIMIT = int(os.environ.get("RELEVANCE_LIMIT",0))
-RESULT_NUMBER = int(os.environ.get("RELEVANCE_LIMIT",10))
+from http_request import make_request
+from const import SEARXNG_INSTANCE, RESULT_NUMBER, RELEVANCE_LIMIT
 
 
-async def request(url, params):
-    async with httpx.AsyncClient() as client:
-        response = await client.request(url=url, method="GET", params=params, timeout=30.0)
-        response.raise_for_status()
-        return response.json()
-
-async def search_web(query, lang):
+async def search_by_searxng(query: str, lang: str | None = None) -> str:
 
     params: dict = {"q": query, "format":"json"}
 
     if lang:
         params["language"] = lang
 
-    search_results = await request(SEARXNG_INSTANCE, params)
+    search_results = await make_request(SEARXNG_INSTANCE, params)
 
-    # Keep only result with relevance over 2
+    # Keep only result with relevance over set relevance limit
     relevant_results: list = []
     for result in search_results["results"]:
         if result["score"] > RELEVANCE_LIMIT:
@@ -35,7 +23,7 @@ async def search_web(query, lang):
 
     # If there is no relevant result, return this information
     if len(relevant_results) == 0:
-        return "No relevant result found"
+        return "No relevant result found."
 
     # Format all results to text.
     formatted_result: str = "Web search results:\n***\n"
