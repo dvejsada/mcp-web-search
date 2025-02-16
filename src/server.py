@@ -1,7 +1,8 @@
 import mcp.types as types
 from mcp.server import Server, NotificationOptions
 from mcp.server.models import InitializationOptions
-from search import search_web
+from searxng import search_by_searxng
+from tavily_api import tavily_search, tavily_extract
 import logging
 
 
@@ -16,7 +17,7 @@ def create_server():
 
     init_options = InitializationOptions(
         server_name="mcp-search",
-        server_version="0.3",
+        server_version="0.4",
         capabilities=server.get_capabilities(
             notification_options=NotificationOptions(),
             experimental_capabilities={},
@@ -32,8 +33,8 @@ def create_server():
         """
         return [
             types.Tool(
-                name="search-web",
-                description="Searches the web using SearxNG.",
+                name="Search_web",
+                description="Searches the web.",
                 inputSchema={
                     "type": "object",
                     "properties": {
@@ -49,6 +50,26 @@ def create_server():
                     "required": ["query"]
                 }
             ),
+            types.Tool(
+                name="Extract_webpage",
+                description="Extracts text from provided URL.",
+                inputSchema={
+                    "$schema": "http://json-schema.org/draft-07/schema#",
+                    "type": "object",
+                    "properties": {
+                        "urls": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            },
+                            "minItems": 1,
+                            "maxItems": 20
+                        }
+                    },
+                    "required": ["urls"],
+                    "additionalProperties": False
+                }
+            )
         ]
 
     @server.call_tool()
@@ -62,14 +83,29 @@ def create_server():
             raise ValueError("Missing arguments")
 
 
-        if name == "search-web":
+        if name == "Search_web":
             lang: str = arguments.get("language")
             query: str = arguments.get("query")
 
             if not query:
                 raise ValueError("No query provided.")
 
-            result_text: str = await search_web(query, lang)
+            result_text: str = await tavily_search(query, lang)
+
+            return [
+                types.TextContent(
+                    type="text",
+                    text=result_text
+                )
+            ]
+
+        if name == "Extract_webpage":
+            urls: list = arguments.get("urls")
+
+            if not 1 <= len(urls) <= 20:
+                raise ValueError("Must be between 1 and 20 URLs to extract")
+
+            result_text: str = await tavily_extract(urls)
 
             return [
                 types.TextContent(
