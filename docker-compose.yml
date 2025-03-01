@@ -9,3 +9,6 @@ services:
       SEARXNG_URL: URL of your SearxNG instance (e.g. http://localhost:8083/search)
       RELEVANCE_LIMIT: Minimum limit for search result relevance score (float)
       RESULT_NUMBER: Maximum number of results returned (int)
+      TAVILY_API_KEY: Your Tavily API key (str)
+      SEARXNG_FALLBACK: If the search should fallback to SearxNG if Tavily fails
+      EXTRACT_DEPTH: Depth of extraction (basic or advanced) - basic may fail often, but it is quicker

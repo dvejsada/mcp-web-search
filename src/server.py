@@ -1,9 +1,8 @@
 import mcp.types as types
+import logging
 from mcp.server import Server, NotificationOptions
 from mcp.server.models import InitializationOptions
-from searxng import search_by_searxng
-from tavily_api import tavily_search, tavily_extract
-import logging
+from tavily_api import Tavily
 
 
 def create_server():
@@ -23,6 +22,8 @@ def create_server():
             experimental_capabilities={},
         ),
     )
+
+    search_client = Tavily()
 
     @server.list_tools()
     async def handle_list_tools() -> list[types.Tool]:
@@ -90,7 +91,7 @@ def create_server():
             if not query:
                 raise ValueError("No query provided.")
 
-            result_text: str = await tavily_search(query, lang)
+            result_text: str = await search_client.tavily_search(query, lang)
 
             return [
                 types.TextContent(
@@ -105,7 +106,7 @@ def create_server():
             if not 1 <= len(urls) <= 20:
                 raise ValueError("Must be between 1 and 20 URLs to extract")
 
-            result_text: str = await tavily_extract(urls)
+            result_text: str = await search_client.tavily_extract(urls)
 
             return [
                 types.TextContent(
